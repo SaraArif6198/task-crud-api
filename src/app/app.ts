@@ -1,5 +1,6 @@
 import express, { type Express } from "express";
 import { metaRouter } from "../routes/meta.routes.js";
+import { tasksRouter } from "../routes/tasks.routes.js";
 
 /**
  * Application factory.
@@ -15,6 +16,9 @@ export function createApp(): Express {
 
   // Meta: GET / (API info), GET /api, GET /health
   app.use(metaRouter);
+
+  // Task CRUD routes
+  app.use(tasksRouter);
 
   return app;
 }
