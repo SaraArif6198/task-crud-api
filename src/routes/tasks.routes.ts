@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as store from "../data/store.js";
-import { CreateTaskSchema, UpdateTaskSchema } from "../schemas/task.schema.js";
+import { CreateTaskSchema, UpdateTaskSchema, TasksQuerySchema } from "../schemas/task.schema.js";
 
 export const tasksRouter = Router();
 
@@ -11,8 +11,29 @@ function parseId(raw: string): number | null {
   return id;
 }
 
-// GET /tasks — list all tasks.
-tasksRouter.get("/tasks", (_req, res) => {
+// GET /tasks — list, with optional ?done, ?search, ?limit, ?offset.
+tasksRouter.get("/tasks", (req, res, next) => {
+  const parsed = TasksQuerySchema.safeParse(req.query);
+  if (!parsed.success) return next(parsed.error);
+  const { done, search, limit, offset } = parsed.data;
+  const { items } = store.query({
+    done: done === undefined ? undefined : done === "true",
+    search,
+    limit,
+    offset,
+  });
+  res.status(200).json(items);
+});
+
+// GET /stats — counts. Defined before /tasks/:id would matter, but it's a
+// distinct path so ordering is not a concern.
+tasksRouter.get("/stats", (_req, res) => {
+  res.status(200).json(store.stats());
+});
+
+// POST /reset — restore the seed tasks (handy for demos and the web UI).
+tasksRouter.post("/reset", (_req, res) => {
+  store.reset();
   res.status(200).json(store.getAll());
 });
 

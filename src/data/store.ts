@@ -32,6 +32,41 @@ export function getAll(): Task[] {
   return tasks;
 }
 
+export interface QueryOptions {
+  done?: boolean;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
+/**
+ * Filtered/searched/paginated view of the tasks.
+ * Returns the matching slice plus the total match count (pre-pagination),
+ * which real APIs expose so clients can build page controls.
+ */
+export function query(opts: QueryOptions): { items: Task[]; total: number } {
+  let result = tasks;
+
+  if (opts.done !== undefined) {
+    result = result.filter((t) => t.done === opts.done);
+  }
+  if (opts.search) {
+    const needle = opts.search.toLowerCase();
+    result = result.filter((t) => t.title.toLowerCase().includes(needle));
+  }
+
+  const total = result.length;
+  const offset = opts.offset ?? 0;
+  const items = opts.limit !== undefined ? result.slice(offset, offset + opts.limit) : result.slice(offset);
+
+  return { items, total };
+}
+
+export function stats(): { total: number; done: number; open: number } {
+  const done = tasks.filter((t) => t.done).length;
+  return { total: tasks.length, done, open: tasks.length - done };
+}
+
 export function getById(id: number): Task | undefined {
   return tasks.find((t) => t.id === id);
 }

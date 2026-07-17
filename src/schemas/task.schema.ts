@@ -33,3 +33,12 @@ export const UpdateTaskSchema = z
     error: "provide at least one field to update (title or done)",
   });
 export type UpdateTask = z.infer<typeof UpdateTaskSchema>;
+
+// Query params for GET /tasks. All optional; coerced from strings.
+export const TasksQuerySchema = z.object({
+  done: z.enum(["true", "false"]).optional(),
+  search: z.string().trim().min(1).optional(),
+  limit: z.coerce.number().int().min(1).max(100).optional(),
+  offset: z.coerce.number().int().min(0).optional(),
+});
+export type TasksQuery = z.infer<typeof TasksQuerySchema>;
