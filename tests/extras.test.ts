@@ -72,4 +72,16 @@ describe("meta", () => {
     expect(res.body.name).toBe("task-crud-api");
     expect(res.body.endpoints).toBeTruthy();
   });
+
+  it("GET / returns JSON for API clients (assignment checkpoint)", async () => {
+    const res = await request(app).get("/").set("Accept", "application/json");
+    expect(res.status).toBe(200);
+    expect(res.body.name).toBe("task-crud-api");
+  });
+
+  it("GET / serves HTML for browsers", async () => {
+    const res = await request(app).get("/").set("Accept", "text/html");
+    expect(res.status).toBe(200);
+    expect(res.type).toBe("text/html");
+  });
 });

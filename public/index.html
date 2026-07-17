@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TASK//API — Neobrutalist Task Manager</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+
+    <header class="masthead">
+      <div class="masthead-title">
+        <h1>TASK<span class="slash">//</span>API</h1>
+        <p class="tagline">A CRUD to-do API you can actually click. In-memory only — restart wipes it.</p>
+      </div>
+      <a class="docs-link" href="/docs" target="_blank" rel="noopener">SWAGGER /docs →</a>
+    </header>
+
+    <section class="stats" id="stats-bar">
+      <div class="stat-card">
+        <span class="stat-num" id="stat-total">0</span>
+        <span class="stat-label">TOTAL</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="stat-open">0</span>
+        <span class="stat-label">OPEN</span>
+      </div>
+      <div class="stat-card stat-done">
+        <span class="stat-num" id="stat-done">0</span>
+        <span class="stat-label">DONE</span>
+      </div>
+    </section>
+
+    <section class="add-row">
+      <form id="add-form" class="add-form" autocomplete="off">
+        <input
+          id="add-input"
+          class="text-input"
+          type="text"
+          placeholder="What needs doing?"
+          aria-label="New task title"
+        />
+        <button class="btn btn-primary" type="submit">ADD TASK</button>
+      </form>
+    </section>
+
+    <section class="controls">
+      <input
+        id="search-input"
+        class="text-input search-input"
+        type="text"
+        placeholder="Search tasks…"
+        aria-label="Search tasks"
+      />
+      <div class="filter-group" role="group" aria-label="Filter tasks">
+        <button class="btn filter-btn is-active" data-filter="all">ALL</button>
+        <button class="btn filter-btn" data-filter="open">OPEN</button>
+        <button class="btn filter-btn" data-filter="done">DONE</button>
+      </div>
+      <button id="reset-btn" class="btn btn-danger" type="button">RESET DEMO</button>
+    </section>
+
+    <main>
+      <ul id="task-list" class="task-list"></ul>
+      <p id="empty-state" class="empty-state" hidden>No tasks here. Add one above.</p>
+    </main>
+
+    <footer class="footer">
+      <span>FlyRank · Backend AI Engineering · Week 2 · A1</span>
+      <span class="mono">no database · no files · pure in-memory</span>
+    </footer>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,402 @@
+/* ============================================================
+   Neobrutalist design system
+   3px black borders · flat hard-offset shadows (no blur)
+   paper background · electric-yellow accent · red for danger
+   ============================================================ */
+
+:root {
+  --paper: #f5f2e8;
+  --ink: #12100c;
+  --yellow: #ffe600;
+  --red: #ff3b30;
+  --green: #14c38e;
+  --blue: #4d7cff;
+  --shadow: 6px 6px 0 var(--ink);
+  --shadow-sm: 4px 4px 0 var(--ink);
+  --border: 3px solid var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 2rem clamp(1rem, 5vw, 4rem);
+  max-width: 960px;
+  margin: 0 auto;
+  /* subtle dotted grid, the only "texture" allowed */
+  background-image: radial-gradient(var(--ink) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-attachment: fixed;
+}
+
+.mono {
+  font-family: "Courier New", monospace;
+}
+
+/* ---------- Masthead ---------- */
+.masthead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border: var(--border);
+  background: var(--yellow);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.masthead h1 {
+  font-family: "Arial Black", "Helvetica Neue", sans-serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 6vw, 3.25rem);
+  letter-spacing: -2px;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.slash {
+  color: var(--red);
+}
+
+.tagline {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  max-width: 40ch;
+}
+
+.docs-link {
+  font-weight: 900;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--paper);
+  border: var(--border);
+  box-shadow: var(--shadow-sm);
+  padding: 0.6rem 0.9rem;
+  white-space: nowrap;
+  transition: transform 0.05s, box-shadow 0.05s;
+}
+
+.docs-link:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.docs-link:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--ink);
+}
+
+/* ---------- Stats ---------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  border: var(--border);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  padding: 1rem;
+  text-align: center;
+}
+
+.stat-card.stat-done {
+  background: var(--green);
+}
+
+.stat-num {
+  display: block;
+  font-family: "Arial Black", sans-serif;
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.stat-label {
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+}
+
+/* ---------- Add form + controls ---------- */
+.add-form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.text-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border: var(--border);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  outline: none;
+}
+
+.text-input:focus {
+  background: var(--yellow);
+}
+
+.search-input {
+  flex: 1 1 200px;
+}
+
+.filter-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  font-family: "Arial Black", sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border: var(--border);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  padding: 0.75rem 1rem;
+  transition: transform 0.05s, box-shadow 0.05s;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--ink);
+}
+
+.btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--ink);
+}
+
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+}
+
+.btn-danger {
+  background: var(--red);
+  color: #fff;
+}
+
+.filter-btn.is-active {
+  background: var(--ink);
+  color: var(--yellow);
+}
+
+/* ---------- Task list ---------- */
+.task-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.task-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: var(--border);
+  background: #fff;
+  box-shadow: var(--shadow);
+  padding: 1rem 1.25rem;
+}
+
+.task-card.is-done {
+  background: #eafaf3;
+}
+
+.task-check {
+  appearance: none;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border: var(--border);
+  background: #fff;
+  cursor: pointer;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+}
+
+.task-check:checked {
+  background: var(--green);
+}
+
+.task-check:checked::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+.task-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.task-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  word-break: break-word;
+}
+
+.task-card.is-done .task-title {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.task-id {
+  font-family: "Courier New", monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  opacity: 0.6;
+}
+
+.task-title-input {
+  width: 100%;
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding: 0.4rem 0.5rem;
+  border: var(--border);
+  background: var(--yellow);
+  outline: none;
+}
+
+.task-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+}
+
+.icon-btn {
+  font-family: "Arial Black", sans-serif;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border: var(--border);
+  background: #fff;
+  box-shadow: 3px 3px 0 var(--ink);
+  padding: 0.5rem 0.6rem;
+  transition: transform 0.05s, box-shadow 0.05s;
+  text-transform: uppercase;
+}
+
+.icon-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+.icon-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--ink);
+}
+
+.icon-btn.danger {
+  background: var(--red);
+  color: #fff;
+}
+
+.empty-state {
+  border: 3px dashed var(--ink);
+  padding: 2rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* ---------- Toasts ---------- */
+.toast-stack {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 100;
+  max-width: 340px;
+}
+
+.toast {
+  border: var(--border);
+  box-shadow: var(--shadow);
+  padding: 0.9rem 1.1rem;
+  font-weight: 700;
+  background: var(--green);
+  color: var(--ink);
+  animation: toast-in 0.12s ease-out;
+}
+
+.toast.toast-error {
+  background: var(--red);
+  color: #fff;
+}
+
+@keyframes toast-in {
+  from {
+    transform: translate(8px, -8px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: var(--border);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 620px) {
+  .add-form {
+    flex-direction: column;
+  }
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filter-group {
+    justify-content: space-between;
+  }
+  .task-card {
+    flex-wrap: wrap;
+  }
+}

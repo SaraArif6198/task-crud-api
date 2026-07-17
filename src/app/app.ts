@@ -1,9 +1,14 @@
 import express, { type Express } from "express";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import swaggerUi from "swagger-ui-express";
 import { metaRouter } from "../routes/meta.routes.js";
 import { tasksRouter } from "../routes/tasks.routes.js";
 import { errorHandler } from "../middleware/error.js";
 import { openapiSpec } from "../docs/openapi.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const publicDir = path.resolve(__dirname, "../../public");
 
 /**
  * Application factory.
@@ -16,6 +21,10 @@ export function createApp(): Express {
   const app = express();
 
   app.use(express.json());
+
+  // Serve web UI assets (styles.css, app.js). index:false so GET / stays
+  // content-negotiated in the meta router rather than auto-serving index.html.
+  app.use(express.static(publicDir, { index: false }));
 
   // Meta: GET / (API info), GET /api, GET /health
   app.use(metaRouter);

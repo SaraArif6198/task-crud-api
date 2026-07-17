@@ -1,11 +1,17 @@
 import { Router } from "express";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const publicDir = path.resolve(__dirname, "../../public");
 
 /**
  * Meta routes: API info and health check.
  *
- * In Stage 1, GET / returns the API-info JSON directly. When the web UI is
- * added later, GET / becomes content-negotiated (HTML for browsers, this same
- * JSON for Accept: application/json), and GET /api remains the always-JSON alias.
+ * GET / is content-negotiated: browsers (Accept: text/html) get the web UI;
+ * curl / API clients (Accept: application/json) get the API-info JSON, so the
+ * assignment's `curl -i http://localhost:3000/` checkpoint still passes.
+ * GET /api is the always-JSON alias.
  */
 export const metaRouter = Router();
 
@@ -24,7 +30,14 @@ const apiInfo = {
   },
 };
 
-metaRouter.get("/", (_req, res) => {
+metaRouter.get("/", (req, res) => {
+  // Browsers send an Accept header explicitly listing text/html → serve the UI.
+  // Plain curl (Accept: */*) and API clients get the API-info JSON, so the
+  // assignment's `curl -i http://localhost:3000/` checkpoint returns JSON.
+  const accept = req.headers.accept ?? "";
+  if (accept.includes("text/html")) {
+    return res.status(200).sendFile(path.join(publicDir, "index.html"));
+  }
   res.status(200).json(apiInfo);
 });
 
