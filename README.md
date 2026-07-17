@@ -165,3 +165,47 @@ ai-version/             Stage 7 — one-shot AI build, quarantined & unedited
 ## Tech stack
 
 Node.js · TypeScript · Express 5 · Zod · swagger-jsdoc + swagger-ui-express · Vitest + supertest · tsx.
+
+---
+
+## AI vs me
+
+Stage 7 is a rematch: I wrote a prompt **from memory** (not copied from the assignment PDF), gave it to an AI in one shot, and dropped the output into `ai-version/index.js` **unedited**. The exact prompt is in [`ai-version/PROMPT.md`](ai-version/PROMPT.md). Then I fired the same checkpoint requests at both.
+
+Run the AI version yourself:
+
+```bash
+cd ai-version && npm install && npm start   # listens on http://localhost:3001
+```
+
+### What the AI did better
+
+Honestly, for ~85 lines it got the happy path right and did it *concisely*. The five endpoints, the correct 200/201/204 codes, in-memory storage, seed data, and a mounted Swagger UI all appeared from a single prompt in one file — no build step, runnable with `node index.js`. If the only bar were "does basic CRUD work", it clears it. I can explain every line it wrote, which is the point of the exercise.
+
+### What it got wrong or ignored
+
+Firing my edge-case curls exposed real gaps:
+
+| Case | My build | AI build |
+|---|---|---|
+| `POST {"title":"   "}` (whitespace) | **400** — title is trimmed then checked | **201** — creates a task with a blank title (`!title` is true only for empty string, not spaces) |
+| `PUT /tasks/1 {}` (empty body) | **400** — "nothing to update" | **200** — silently no-ops and returns the task unchanged |
+| Malformed JSON body | **400** `{error}` | **500** — leaks a full HTML stack trace to the client |
+| Client sends `{"id":99,"done":true}` | ignored — server assigns id, forces `done:false` | ignored too (good), but only by luck — it destructures `{title}` and never reads them |
+| Swagger schemas | request/response bodies documented | endpoints listed, but **no request/response schemas** — "Try it out" gives no body hints |
+
+The malformed-JSON 500 is the worst of these: the assignment explicitly requires a JSON error for a bad body, and the AI's version crashes the request into Express's default HTML error page (stack trace and all), which is both wrong and a small information leak.
+
+### What my prompt failed to specify
+
+The AI's mistakes were partly *my* fault as the prompt author — it silently decided things I never pinned down:
+
+- I said "empty title → 400" but never said **whitespace-only** counts as empty, so it took the literal reading.
+- I never said what `PUT` with an **empty body** should do, so it chose "succeed and change nothing".
+- I never mentioned **malformed JSON**, so it never added a body-parser error handler.
+- I said "document all endpoints" but not "**document the request/response bodies**", so it wrote a skeletal spec.
+
+### The improved rematch (one sentence)
+
+Adding three clauses to the prompt — "treat a whitespace-only title as empty (400)", "reject an empty PUT body with 400", and "return JSON `{error}` (never a stack trace) for a malformed body" — closes every gap above, which is the real lesson: the specification, not the model, was the weak link.
+

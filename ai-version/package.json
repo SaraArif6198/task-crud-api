@@ -1,0 +1,13 @@
+{
+  "name": "ai-version",
+  "version": "1.0.0",
+  "description": "One-shot AI-generated to-do API — Stage 7 rematch (quarantined, unedited)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
