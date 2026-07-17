@@ -11,7 +11,41 @@ function parseId(raw: string): number | null {
   return id;
 }
 
-// GET /tasks — list, with optional ?done, ?search, ?limit, ?offset.
+/**
+ * @openapi
+ * /tasks:
+ *   get:
+ *     summary: List tasks
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: query
+ *         name: done
+ *         schema: { type: string, enum: ["true", "false"] }
+ *         description: Filter by completion state
+ *       - in: query
+ *         name: search
+ *         schema: { type: string }
+ *         description: Case-insensitive title substring match
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, minimum: 1, maximum: 100 }
+ *         description: Max items to return (pagination)
+ *       - in: query
+ *         name: offset
+ *         schema: { type: integer, minimum: 0 }
+ *         description: Items to skip (pagination)
+ *     responses:
+ *       200:
+ *         description: Array of tasks
+ *         content:
+ *           application/json:
+ *             schema: { type: array, items: { $ref: '#/components/schemas/Task' } }
+ *       400:
+ *         description: Invalid query parameter
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ */
 tasksRouter.get("/tasks", (req, res, next) => {
   const parsed = TasksQuerySchema.safeParse(req.query);
   if (!parsed.success) return next(parsed.error);
@@ -25,19 +59,64 @@ tasksRouter.get("/tasks", (req, res, next) => {
   res.status(200).json(items);
 });
 
-// GET /stats — counts. Defined before /tasks/:id would matter, but it's a
-// distinct path so ordering is not a concern.
+/**
+ * @openapi
+ * /stats:
+ *   get:
+ *     summary: Task counts
+ *     tags: [Meta]
+ *     responses:
+ *       200:
+ *         description: Totals
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Stats' }
+ */
 tasksRouter.get("/stats", (_req, res) => {
   res.status(200).json(store.stats());
 });
 
-// POST /reset — restore the seed tasks (handy for demos and the web UI).
+/**
+ * @openapi
+ * /reset:
+ *   post:
+ *     summary: Restore the seed tasks
+ *     tags: [Meta]
+ *     responses:
+ *       200:
+ *         description: The restored seed tasks
+ *         content:
+ *           application/json:
+ *             schema: { type: array, items: { $ref: '#/components/schemas/Task' } }
+ */
 tasksRouter.post("/reset", (_req, res) => {
   store.reset();
   res.status(200).json(store.getAll());
 });
 
-// GET /tasks/:id — one task, or 404.
+/**
+ * @openapi
+ * /tasks/{id}:
+ *   get:
+ *     summary: Get one task
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: The task
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Task' }
+ *       404:
+ *         description: No such task
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ */
 tasksRouter.get("/tasks/:id", (req, res) => {
   const id = parseId(req.params.id);
   if (id === null) {
@@ -50,7 +129,29 @@ tasksRouter.get("/tasks/:id", (req, res) => {
   res.status(200).json(task);
 });
 
-// POST /tasks — create. Body validated by Zod; client-sent id/done are ignored.
+/**
+ * @openapi
+ * /tasks:
+ *   post:
+ *     summary: Create a task
+ *     tags: [Tasks]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/CreateTask' }
+ *     responses:
+ *       201:
+ *         description: The created task
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Task' }
+ *       400:
+ *         description: Missing or empty title
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ */
 tasksRouter.post("/tasks", (req, res, next) => {
   const parsed = CreateTaskSchema.safeParse(req.body);
   if (!parsed.success) return next(parsed.error);
@@ -58,7 +159,39 @@ tasksRouter.post("/tasks", (req, res, next) => {
   res.status(201).json(task);
 });
 
-// PUT /tasks/:id — partial update (title and/or done). Empty body → 400.
+/**
+ * @openapi
+ * /tasks/{id}:
+ *   put:
+ *     summary: Update a task (partial)
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema: { $ref: '#/components/schemas/UpdateTask' }
+ *     responses:
+ *       200:
+ *         description: The updated task
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Task' }
+ *       400:
+ *         description: Empty body or invalid field
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ *       404:
+ *         description: No such task
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ */
 tasksRouter.put("/tasks/:id", (req, res, next) => {
   const id = parseId(req.params.id);
   if (id === null) {
@@ -73,7 +206,26 @@ tasksRouter.put("/tasks/:id", (req, res, next) => {
   res.status(200).json(task);
 });
 
-// DELETE /tasks/:id — 204 on success, 404 if unknown.
+/**
+ * @openapi
+ * /tasks/{id}:
+ *   delete:
+ *     summary: Delete a task
+ *     tags: [Tasks]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       204:
+ *         description: Deleted (empty body)
+ *       404:
+ *         description: No such task
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ */
 tasksRouter.delete("/tasks/:id", (req, res) => {
   const id = parseId(req.params.id);
   if (id === null) {

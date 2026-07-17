@@ -1,7 +1,9 @@
 import express, { type Express } from "express";
+import swaggerUi from "swagger-ui-express";
 import { metaRouter } from "../routes/meta.routes.js";
 import { tasksRouter } from "../routes/tasks.routes.js";
 import { errorHandler } from "../middleware/error.js";
+import { openapiSpec } from "../docs/openapi.js";
 
 /**
  * Application factory.
@@ -17,6 +19,9 @@ export function createApp(): Express {
 
   // Meta: GET / (API info), GET /api, GET /health
   app.use(metaRouter);
+
+  // Swagger UI at /docs (spec generated from JSDoc @openapi comments)
+  app.use("/docs", swaggerUi.serve, swaggerUi.setup(openapiSpec));
 
   // Task CRUD routes
   app.use(tasksRouter);
