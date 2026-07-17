@@ -1,4 +1,5 @@
 import express, { type Express } from "express";
+import { metaRouter } from "../routes/meta.routes.js";
 
 /**
  * Application factory.
@@ -12,10 +13,8 @@ export function createApp(): Express {
 
   app.use(express.json());
 
-  // Stage 0 — hello server. Replaced by real routes in later stages.
-  app.get("/", (_req, res) => {
-    res.status(200).json({ message: "Task API is running. Visit /api for details." });
-  });
+  // Meta: GET / (API info), GET /api, GET /health
+  app.use(metaRouter);
 
   return app;
 }
