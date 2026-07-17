@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 import { metaRouter } from "../routes/meta.routes.js";
 import { tasksRouter } from "../routes/tasks.routes.js";
+import { errorHandler } from "../middleware/error.js";
 
 /**
  * Application factory.
@@ -19,6 +20,9 @@ export function createApp(): Express {
 
   // Task CRUD routes
   app.use(tasksRouter);
+
+  // Central error handler — must be mounted last.
+  app.use(errorHandler);
 
   return app;
 }
