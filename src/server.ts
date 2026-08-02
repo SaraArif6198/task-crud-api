@@ -6,7 +6,10 @@ const PORT = Number(process.env.PORT) || 3000;
 const app = createApp();
 
 const server = app.listen(PORT, () => {
-  console.log(`Task API listening on http://localhost:${PORT}`);
+  const authStatus = process.env.SUPABASE_URL && process.env.SUPABASE_KEY
+    ? "Supabase Auth configured"
+    : "Supabase Auth needs SUPABASE_URL and SUPABASE_KEY";
+  console.log(`Task API listening on http://localhost:${PORT} · ${authStatus}`);
 });
 
 async function shutdown(): Promise<void> {

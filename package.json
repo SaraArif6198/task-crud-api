@@ -1,7 +1,7 @@
 {
   "name": "task-crud-api",
-  "version": "3.0.0",
-  "description": "A Dockerized PostgreSQL CRUD Task API — FlyRank Backend AI Engineering BE-04",
+  "version": "4.0.0",
+  "description": "An authenticated PostgreSQL Task API with Supabase JWT verification — FlyRank Backend AI Engineering",
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
@@ -16,11 +16,14 @@
     "express",
     "typescript",
     "rest-api",
-    "swagger"
+    "swagger",
+    "authentication",
+    "supabase"
   ],
   "author": "Sara Arif",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.111.0",
     "dotenv": "^17.4.2",
     "express": "^5.1.0",
     "pg": "^8.22.0",
