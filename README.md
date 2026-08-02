@@ -199,6 +199,10 @@ The persistence checkpoint was verified with task `20005`: it was created, both 
 
 ![The same task returned after both containers restarted](screenshots/phase%203/23-persistence-proven-after-restart.png)
 
+The browser interface also loaded the persisted task from PostgreSQL after the restart:
+
+![Persisted task displayed in the browser interface](screenshots/phase%203/24-frontend-persisted-task.png)
+
 ## Testing
 
 Install dependencies and run the automated checks:
