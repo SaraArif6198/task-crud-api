@@ -5,8 +5,8 @@ import { reset } from "../src/data/store.js";
 
 const app = createApp();
 
-beforeEach(() => {
-  reset();
+beforeEach(async () => {
+  await reset();
 });
 
 describe("filtering and search", () => {

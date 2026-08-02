@@ -46,11 +46,11 @@ function parseId(raw: string): number | null {
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-tasksRouter.get("/tasks", (req, res, next) => {
+tasksRouter.get("/tasks", async (req, res, next) => {
   const parsed = TasksQuerySchema.safeParse(req.query);
   if (!parsed.success) return next(parsed.error);
   const { done, search, limit, offset } = parsed.data;
-  const { items } = store.query({
+  const { items } = await store.query({
     done: done === undefined ? undefined : done === "true",
     search,
     limit,
@@ -72,8 +72,8 @@ tasksRouter.get("/tasks", (req, res, next) => {
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Stats' }
  */
-tasksRouter.get("/stats", (_req, res) => {
-  res.status(200).json(store.stats());
+tasksRouter.get("/stats", async (_req, res) => {
+  res.status(200).json(await store.stats());
 });
 
 /**
@@ -89,9 +89,9 @@ tasksRouter.get("/stats", (_req, res) => {
  *           application/json:
  *             schema: { type: array, items: { $ref: '#/components/schemas/Task' } }
  */
-tasksRouter.post("/reset", (_req, res) => {
-  store.reset();
-  res.status(200).json(store.getAll());
+tasksRouter.post("/reset", async (_req, res) => {
+  await store.reset();
+  res.status(200).json(await store.getAll());
 });
 
 /**
@@ -117,12 +117,12 @@ tasksRouter.post("/reset", (_req, res) => {
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-tasksRouter.get("/tasks/:id", (req, res) => {
+tasksRouter.get("/tasks/:id", async (req, res) => {
   const id = parseId(req.params.id);
   if (id === null) {
     return res.status(404).json({ error: `Task ${req.params.id} not found` });
   }
-  const task = store.getById(id);
+  const task = await store.getById(id);
   if (!task) {
     return res.status(404).json({ error: `Task ${id} not found` });
   }
@@ -152,10 +152,10 @@ tasksRouter.get("/tasks/:id", (req, res) => {
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-tasksRouter.post("/tasks", (req, res, next) => {
+tasksRouter.post("/tasks", async (req, res, next) => {
   const parsed = CreateTaskSchema.safeParse(req.body);
   if (!parsed.success) return next(parsed.error);
-  const task = store.create(parsed.data.title);
+  const task = await store.create(parsed.data.title);
   res.status(201).json(task);
 });
 
@@ -192,14 +192,14 @@ tasksRouter.post("/tasks", (req, res, next) => {
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-tasksRouter.put("/tasks/:id", (req, res, next) => {
+tasksRouter.put("/tasks/:id", async (req, res, next) => {
   const id = parseId(req.params.id);
   if (id === null) {
     return res.status(404).json({ error: `Task ${req.params.id} not found` });
   }
   const parsed = UpdateTaskSchema.safeParse(req.body);
   if (!parsed.success) return next(parsed.error);
-  const task = store.update(id, parsed.data);
+  const task = await store.update(id, parsed.data);
   if (!task) {
     return res.status(404).json({ error: `Task ${id} not found` });
   }
@@ -226,12 +226,12 @@ tasksRouter.put("/tasks/:id", (req, res, next) => {
  *           application/json:
  *             schema: { $ref: '#/components/schemas/Error' }
  */
-tasksRouter.delete("/tasks/:id", (req, res) => {
+tasksRouter.delete("/tasks/:id", async (req, res) => {
   const id = parseId(req.params.id);
   if (id === null) {
     return res.status(404).json({ error: `Task ${req.params.id} not found` });
   }
-  const removed = store.remove(id);
+  const removed = await store.remove(id);
   if (!removed) {
     return res.status(404).json({ error: `Task ${id} not found` });
   }
