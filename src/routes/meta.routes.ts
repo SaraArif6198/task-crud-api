@@ -17,7 +17,7 @@ export const metaRouter = Router();
 
 const apiInfo = {
   name: "task-crud-api",
-  version: "1.0.0",
+  version: "2.0.0",
   endpoints: {
     "GET /tasks": "list tasks (supports ?done, ?search, ?limit, ?offset)",
     "GET /tasks/:id": "get one task",

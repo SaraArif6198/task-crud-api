@@ -9,9 +9,9 @@ export const openapiSpec = swaggerJsdoc({
     openapi: "3.0.3",
     info: {
       title: "Task CRUD API",
-      version: "1.0.0",
+      version: "2.0.0",
       description:
-        "A small in-memory to-do CRUD API — FlyRank Backend AI Engineering, Week 2 Assignment 1. Data lives in memory only and resets when the server restarts.",
+        "A SQLite-backed to-do CRUD API — FlyRank Backend AI Engineering, Week 3 Assignment A2. Data persists in tasks.db across server restarts.",
     },
     servers: [{ url: "http://localhost:3000", description: "Local dev server" }],
     components: {
