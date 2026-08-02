@@ -5,6 +5,11 @@ ai-version/node_modules/
 # Build output
 dist/
 
+# Local SQLite database (created automatically)
+tasks.db
+tasks.db-shm
+tasks.db-wal
+
 # Environment
 .env
 
