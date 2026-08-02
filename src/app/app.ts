@@ -6,6 +6,8 @@ import { metaRouter } from "../routes/meta.routes.js";
 import { tasksRouter } from "../routes/tasks.routes.js";
 import { errorHandler } from "../middleware/error.js";
 import { openapiSpec } from "../docs/openapi.js";
+import { supabaseAuthProvider, type AuthProvider } from "../auth/auth-provider.js";
+import { createAuthRouter } from "../routes/auth.routes.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.resolve(__dirname, "../../public");
@@ -17,8 +19,9 @@ const publicDir = path.resolve(__dirname, "../../public");
  * (see server.ts). This lets tests import a fresh app with supertest without
  * binding a real port.
  */
-export function createApp(): Express {
+export function createApp(options: { authProvider?: AuthProvider } = {}): Express {
   const app = express();
+  const authProvider = options.authProvider ?? supabaseAuthProvider;
 
   app.use(express.json());
 
@@ -31,6 +34,9 @@ export function createApp(): Express {
 
   // Swagger UI at /docs (spec generated from JSDoc @openapi comments)
   app.use("/docs", swaggerUi.serve, swaggerUi.setup(openapiSpec));
+
+  // Public authentication endpoints and middleware-protected user endpoints.
+  app.use(createAuthRouter(authProvider));
 
   // Task CRUD routes
   app.use(tasksRouter);
