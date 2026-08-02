@@ -9,9 +9,9 @@ export const openapiSpec = swaggerJsdoc({
     openapi: "3.0.3",
     info: {
       title: "Task CRUD API",
-      version: "2.0.0",
+      version: "3.0.0",
       description:
-        "A SQLite-backed to-do CRUD API — FlyRank Backend AI Engineering, Week 3 Assignment A2. Data persists in tasks.db across server restarts.",
+        "A Dockerized PostgreSQL to-do CRUD API — FlyRank Backend AI Engineering, BE-04. Data persists in a named Docker volume.",
     },
     servers: [{ url: "http://localhost:3000", description: "Local dev server" }],
     components: {
