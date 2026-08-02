@@ -1,16 +1,6 @@
-# Task CRUD API
+# Task CRUD API — SQLite edition
 
-A small REST API that manages a to-do list — **C**reate, **R**ead, **U**pdate, **D**elete — built for **FlyRank · Backend AI Engineering · Week 2 · Assignment 1 (BE-01)**.
-
-Data lives **in memory only**. There is no database and nothing is written to disk — restarting the server wipes everything back to three seed tasks. That is deliberate (see [The mortality experiment](#the-mortality-experiment)).
-
-It ships three ways to use the same API:
-
-1. **A neobrutalist web UI** at `http://localhost:3000` — clickable, for non-technical users.
-2. **Swagger UI** at `http://localhost:3000/docs` — interactive API docs, "Try it out".
-3. **Plain HTTP** — `curl`, Postman, or anything that speaks JSON.
-
----
+A persistent REST API for FlyRank Backend AI Engineering, Week 3 Assignment A2 (BE-02). It keeps the exact CRUD contract from Assignment 1 while replacing the in-memory array with SQLite.
 
 ## Run it
 
@@ -21,191 +11,81 @@ npm install
 npm run dev
 ```
 
-That is the one documented command. The server starts on `http://localhost:3000`.
+The first start automatically creates `tasks.db`, creates the `tasks` table, and inserts three example tasks only when the table is empty. No database server or manual setup is needed.
 
-| What | Where |
-|---|---|
-| Web UI | http://localhost:3000 |
-| Swagger UI | http://localhost:3000/docs |
-| API info (JSON) | http://localhost:3000/api |
+- Web UI: http://localhost:3000
+- Swagger UI: http://localhost:3000/docs
+- API information: http://localhost:3000/api
 
-Other scripts: `npm test` (Vitest + supertest), `npm run build` (compile to `dist/`), `npm start` (run the compiled build).
+Use `npm test` to run the integration tests and `npm run build` to compile TypeScript.
 
----
+## Why SQLite
 
-## Endpoints
+SQLite was chosen because it is a single local file, needs no separate server or configuration, and preserves data across application restarts. The database lives at `tasks.db` in the project root. It is Git-ignored so each clone creates a clean database automatically.
 
-| Method | Path | Success | Errors | Notes |
-|---|---|---|---|---|
-| `GET` | `/` | 200 | — | Web UI (browser) or API-info JSON (curl/API clients) — see [The `GET /` decision](#the-get--decision) |
-| `GET` | `/api` | 200 | — | API info `{name, version, endpoints}`, always JSON |
-| `GET` | `/health` | 200 | — | `{status:"ok"}` |
-| `GET` | `/tasks` | 200 | 400 | Supports `?done=`, `?search=`, `?limit=`, `?offset=` |
-| `GET` | `/tasks/:id` | 200 | 404 | 404 → `{error:"Task 99 not found"}` |
-| `POST` | `/tasks` | 201 | 400 | Body `{title}`; missing/empty title → 400 |
-| `PUT` | `/tasks/:id` | 200 | 400, 404 | Partial update `{title?, done?}`; empty body → 400 |
-| `DELETE` | `/tasks/:id` | 204 | 404 | Empty body on success |
-| `GET` | `/stats` | 200 | — | `{total, done, open}` |
-| `POST` | `/reset` | 200 | — | Restore the three seed tasks |
+## API contract
 
-A **Task** is exactly `{ "id": number, "title": string, "done": boolean }`. Every error is JSON: `{ "error": "<message>" }`.
+| Method | Path | Success | Errors |
+|---|---|---:|---:|
+| `GET` | `/tasks` | 200 | 400 |
+| `GET` | `/tasks/:id` | 200 | 404 |
+| `POST` | `/tasks` | 201 | 400 |
+| `PUT` | `/tasks/:id` | 200 | 400, 404 |
+| `DELETE` | `/tasks/:id` | 204 | 404 |
 
-### Query parameters on `GET /tasks`
+A task remains `{ "id": number, "title": string, "done": boolean }`. Error responses remain `{ "error": "message" }`.
 
-- `?done=true` / `?done=false` — filter by completion state
-- `?search=milk` — case-insensitive title substring match
-- `?limit=2&offset=1` — pagination (see [Why pagination](#why-pagination))
+Optional SQL-backed features from Assignment 1 are retained:
 
----
+- `GET /tasks?search=milk` uses `LIKE`.
+- `GET /tasks?done=true` uses `WHERE done = ?`.
+- `GET /tasks?limit=10&offset=0` uses SQL pagination.
+- `GET /stats` uses `COUNT()` and `SUM()`.
 
-## Example: `curl -i`
+Every client value is passed separately through a parameterized `?` placeholder. The status and title indexes help SQLite find filtered rows efficiently. The three seed inserts run in a transaction, so they either all succeed or all roll back.
 
-Creating a task shows the status line, headers, and JSON body:
+## SQL explored by hand
 
-```
-$ curl -i -X POST http://localhost:3000/tasks \
-    -H "Content-Type: application/json" \
-    -d '{"title":"Buy milk"}'
+Example query:
 
-HTTP/1.1 201 Created
-X-Powered-By: Express
-Content-Type: application/json; charset=utf-8
-Content-Length: 40
-ETag: W/"28-PpSBYV7i68cXyGc7AhjVpkZkY5Q"
-Date: Fri, 17 Jul 2026 19:00:12 GMT
-Connection: keep-alive
-Keep-Alive: timeout=5
-
-{"id":4,"title":"Buy milk","done":false}
+```sql
+SELECT * FROM tasks WHERE done = 1;
 ```
 
-More checkpoints (Git Bash quoting — paste as-is):
+It returned only completed tasks. Other Stage 4 queries:
 
-```bash
-curl -i http://localhost:3000/tasks             # 200 + 3 seed tasks
-curl -i http://localhost:3000/tasks/99          # 404 + {"error":"Task 99 not found"}
-curl -i -X POST http://localhost:3000/tasks -H "Content-Type: application/json" -d '{}'   # 400
-curl -i -X PUT  http://localhost:3000/tasks/1 -H "Content-Type: application/json" -d '{"done":true}'  # 200
-curl -i -X DELETE http://localhost:3000/tasks/1 # 204 (empty body)
+```sql
+SELECT * FROM tasks;
+SELECT COUNT(*) FROM tasks;
+UPDATE tasks SET done = 1;
+DELETE FROM tasks WHERE done = 1;
 ```
 
----
+After changing a row in a SQLite viewer, refresh `GET /tasks`; the API immediately returns the same data because both read the same `tasks.db` file.
 
-## Swagger UI
+## Database viewer
 
-Open `http://localhost:3000/docs`. Every endpoint is listed with its request/response schema; "Try it out" runs a real request against the live server, so the full CRUD cycle works in the browser.
+Open `tasks.db` in DB Browser for SQLite, select **Browse Data**, and choose the `tasks` table.
 
-![Swagger UI](screenshots/swagger.png)
+![Tasks table queried in DB Browser for SQLite](screenshots/phase%202/Screenshot%202026-08-02%20171248.png)
 
-> The OpenAPI spec is **generated from JSDoc `@openapi` comments** on the route handlers (`src/routes/tasks.routes.ts`) via `swagger-jsdoc` — it is derived from the code, not hand-maintained. This is the assignment's stretch goal.
+The Stage 4 evidence in [`screenshots/phase 2`](screenshots/phase%202/) also shows `WHERE done = 1`, `COUNT(*)`, `UPDATE`, `DELETE`, and the resulting changes in the frontend.
 
----
+## Proving persistence
 
-## Web UI
+1. Start the app and create a task with `POST /tasks`.
+2. Stop the process and run `npm run dev` again.
+3. Call `GET /tasks`; the new task is still present.
 
-A **neobrutalist** single-page task manager, served same-origin by Express from `public/`. No framework, no build step — plain HTML/CSS/JS. It surfaces the whole API visually: add, toggle done, inline-edit titles, delete, live search, all/open/done filters, a live stats bar, a reset-demo button, and success/error toasts (the red toasts show the API's own JSON `{error}` messages, so validation is visible to non-technical users).
-
-The look is deliberately **not** the generic "AI theme" — no gradients, glow, or glassmorphism. Instead: paper background, 3px black borders, flat hard-offset shadows, an electric-yellow accent, and buttons that physically "press" on click.
-
-![Web UI](screenshots/web-ui.png)
-
-> Open `http://localhost:3000` in a browser.
-
-### The `GET /` decision
-
-The assignment wants `GET /` to return API-info JSON; the UI wants `GET /` to serve the page. Both are satisfied with **content negotiation**: browsers (which send `Accept: text/html`) get the UI; plain `curl` and API clients get the JSON. `GET /api` is an always-JSON alias so a stable JSON root always exists. This keeps the `curl -i http://localhost:3000/` checkpoint returning JSON.
-
----
-
-## Why the extra engineering
-
-The base brief targets a beginner (≈100 lines of plain JS, no tests). This build applies senior engineering discipline while respecting every rule:
-
-- **TypeScript + Zod** — the data model is defined once as Zod schemas and drives both runtime validation and the TS types. Validation is declarative, not a pile of manual `if` checks.
-- **App-factory pattern** — `createApp()` is decoupled from the port listener (`src/server.ts`), so tests import a fresh app with supertest and never bind a port.
-- **Vitest + supertest** — 25 integration tests assert every status code (200/201/204/400/404), non-reused ids, all validation paths, the extras, and the `GET /` negotiation. The assignment asks for none.
-- **A central error handler** — malformed JSON and Zod failures both become clean `400 {error}` responses instead of leaking a 500 with a stack trace.
-
-### Design choices worth calling out
-
-- **IDs are never reused.** A monotonic counter assigns ids; deleting task 2 does not free id 2. This is more correct than `array.length + 1`, which collides after deletes.
-- **The server never trusts the client.** `POST /tasks` ignores any client-sent `id`/`done` — it always assigns its own id and forces `done:false`.
-- **Non-numeric ids are 404, not 500.** `GET /tasks/abc` is treated as "no such task".
-
-### Why pagination
-
-`GET /tasks?limit=&offset=` exists because **real APIs never return "everything"**. As a collection grows, an unbounded list means an ever-larger response: more bytes over the wire, higher latency, and more memory pressure on both server and client. Pagination lets a client ask for a bounded window (e.g. 20 at a time) and page through the rest, keeping every response fast and predictable regardless of how big the underlying dataset gets.
-
----
-
-## The mortality experiment
-
-Create a few tasks, then stop and restart the server. They are **gone** — the store is a plain in-memory array, so every restart resets to the three seeds. That is the whole point of this assignment: it makes the need for real persistence tangible, which is exactly the problem a database (Week 3) solves.
-
----
+The Assignment 1 endpoint tests still pass unchanged. That proves persistence is an implementation detail: the storage changed from an array to SQL, while the API’s URLs, bodies, responses, and status codes did not.
 
 ## Project structure
 
+```text
+src/data/store.ts        SQLite schema, seeding, and parameterized CRUD queries
+src/routes/              unchanged HTTP/API layer
+src/schemas/             unchanged Zod validation
+public/                  browser task manager
+tests/                   CRUD, validation, extras, and database tests
+tasks.db                 generated local database (Git-ignored)
 ```
-src/
-  app/app.ts            createApp() — routes, static UI, docs, error handler
-  data/store.ts         in-memory tasks + seed/reset + query/stats
-  routes/               tasks.routes.ts (CRUD + extras), meta.routes.ts
-  schemas/task.schema.ts  Zod model: Task, CreateTask, UpdateTask, query
-  docs/openapi.ts       swagger-jsdoc config
-  middleware/error.ts   central JSON error handler
-  server.ts             listens on PORT (default 3000)
-public/                 neobrutalist web UI (index.html, styles.css, app.js)
-tests/                  Vitest + supertest (crud, validation, extras)
-ai-version/             Stage 7 — one-shot AI build, quarantined & unedited
-```
-
----
-
-## Tech stack
-
-Node.js · TypeScript · Express 5 · Zod · swagger-jsdoc + swagger-ui-express · Vitest + supertest · tsx.
-
----
-
-## AI vs me
-
-Stage 7 is a rematch: I wrote a prompt **from memory** (not copied from the assignment PDF), gave it to an AI in one shot, and dropped the output into `ai-version/index.js` **unedited**. The exact prompt is in [`ai-version/PROMPT.md`](ai-version/PROMPT.md). Then I fired the same checkpoint requests at both.
-
-Run the AI version yourself:
-
-```bash
-cd ai-version && npm install && npm start   # listens on http://localhost:3001
-```
-
-### What the AI did better
-
-Honestly, for ~85 lines it got the happy path right and did it *concisely*. The five endpoints, the correct 200/201/204 codes, in-memory storage, seed data, and a mounted Swagger UI all appeared from a single prompt in one file — no build step, runnable with `node index.js`. If the only bar were "does basic CRUD work", it clears it. I can explain every line it wrote, which is the point of the exercise.
-
-### What it got wrong or ignored
-
-Firing my edge-case curls exposed real gaps:
-
-| Case | My build | AI build |
-|---|---|---|
-| `POST {"title":"   "}` (whitespace) | **400** — title is trimmed then checked | **201** — creates a task with a blank title (`!title` is true only for empty string, not spaces) |
-| `PUT /tasks/1 {}` (empty body) | **400** — "nothing to update" | **200** — silently no-ops and returns the task unchanged |
-| Malformed JSON body | **400** `{error}` | **500** — leaks a full HTML stack trace to the client |
-| Client sends `{"id":99,"done":true}` | ignored — server assigns id, forces `done:false` | ignored too (good), but only by luck — it destructures `{title}` and never reads them |
-| Swagger schemas | request/response bodies documented | endpoints listed, but **no request/response schemas** — "Try it out" gives no body hints |
-
-The malformed-JSON 500 is the worst of these: the assignment explicitly requires a JSON error for a bad body, and the AI's version crashes the request into Express's default HTML error page (stack trace and all), which is both wrong and a small information leak.
-
-### What my prompt failed to specify
-
-The AI's mistakes were partly *my* fault as the prompt author — it silently decided things I never pinned down:
-
-- I said "empty title → 400" but never said **whitespace-only** counts as empty, so it took the literal reading.
-- I never said what `PUT` with an **empty body** should do, so it chose "succeed and change nothing".
-- I never mentioned **malformed JSON**, so it never added a body-parser error handler.
-- I said "document all endpoints" but not "**document the request/response bodies**", so it wrote a skeletal spec.
-
-### The improved rematch (one sentence)
-
-Adding three clauses to the prompt — "treat a whitespace-only title as empty (400)", "reject an empty PUT body with 400", and "return JSON `{error}` (never a stack trace) for a malformed body" — closes every gap above, which is the real lesson: the specification, not the model, was the weak link.
-
