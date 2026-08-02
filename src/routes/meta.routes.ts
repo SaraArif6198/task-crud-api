@@ -17,8 +17,14 @@ export const metaRouter = Router();
 
 const apiInfo = {
   name: "task-crud-api",
-  version: "3.0.0",
+  version: "4.0.0",
   endpoints: {
+    "POST /auth/signup": "create a Supabase user",
+    "POST /auth/login": "authenticate and return JWT tokens",
+    "POST /auth/logout": "end an authenticated session (Bearer token required)",
+    "GET /public/info": "public information",
+    "GET /protected/profile": "verified user profile (Bearer token required)",
+    "GET /protected/dashboard": "protected dashboard (Bearer token required)",
     "GET /tasks": "list tasks (supports ?done, ?search, ?limit, ?offset)",
     "GET /tasks/:id": "get one task",
     "POST /tasks": "create a task",
@@ -36,9 +42,13 @@ metaRouter.get("/", (req, res) => {
   // assignment's `curl -i http://localhost:3000/` checkpoint returns JSON.
   const accept = req.headers.accept ?? "";
   if (accept.includes("text/html")) {
-    return res.status(200).sendFile(path.join(publicDir, "index.html"));
+    return res.status(200).sendFile(path.join(publicDir, "auth.html"));
   }
   res.status(200).json(apiInfo);
+});
+
+metaRouter.get("/app", (_req, res) => {
+  res.status(200).sendFile(path.join(publicDir, "index.html"));
 });
 
 metaRouter.get("/api", (_req, res) => {

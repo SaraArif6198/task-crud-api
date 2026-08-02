@@ -15,11 +15,15 @@ const els = {
   statOpen: document.getElementById("stat-open"),
   statDone: document.getElementById("stat-done"),
   toastStack: document.getElementById("toast-stack"),
+  profileBtn: document.getElementById("profile-btn"),
+  logoutBtn: document.getElementById("logout-btn"),
+  sessionUser: document.getElementById("session-user"),
 };
 
 const state = {
   filter: "all", // all | open | done
   search: "",
+  accessToken: sessionStorage.getItem("task-api-access-token"),
 };
 
 // ---------- Toasts ----------
@@ -43,6 +47,40 @@ async function api(path, options = {}) {
     throw new Error(body.error || `Request failed (${res.status})`);
   }
   return body;
+}
+
+async function authApi(path, options = {}, authenticated = false) {
+  const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+  if (authenticated && state.accessToken) headers.Authorization = `Bearer ${state.accessToken}`;
+  return api(path, { ...options, headers });
+}
+
+function setAuthState(token, message = "") {
+  state.accessToken = token;
+  if (token) sessionStorage.setItem("task-api-access-token", token);
+  else sessionStorage.removeItem("task-api-access-token");
+  els.sessionUser.textContent = message;
+}
+
+async function showProfile() {
+  try {
+    const profile = await authApi("/protected/profile", {}, true);
+    setAuthState(state.accessToken, `${profile.email} · ${profile.id.slice(0, 8)}…`);
+    toast("Protected profile verified");
+  } catch (err) {
+    setAuthState(null);
+    window.location.replace("/");
+  }
+}
+
+async function logout() {
+  try {
+    await authApi("/auth/logout", { method: "POST" }, true);
+    setAuthState(null);
+    window.location.replace("/");
+  } catch (err) {
+    toast(err.message, true);
+  }
 }
 
 function buildTasksQuery() {
@@ -188,6 +226,8 @@ async function refresh() {
 // ---------- Wiring ----------
 els.addForm.addEventListener("submit", addTask);
 els.resetBtn.addEventListener("click", resetDemo);
+els.profileBtn.addEventListener("click", showProfile);
+els.logoutBtn.addEventListener("click", logout);
 
 let searchTimer;
 els.search.addEventListener("input", () => {
@@ -207,4 +247,20 @@ for (const btn of els.filterBtns) {
   });
 }
 
-refresh();
+async function bootstrap() {
+  if (!state.accessToken) {
+    window.location.replace("/");
+    return;
+  }
+
+  try {
+    const profile = await authApi("/protected/profile", {}, true);
+    setAuthState(state.accessToken, `${profile.email} · ${profile.id.slice(0, 8)}…`);
+    await refresh();
+  } catch {
+    setAuthState(null);
+    window.location.replace("/");
+  }
+}
+
+bootstrap();

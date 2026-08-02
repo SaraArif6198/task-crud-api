@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign in — TASK//API</title>
+    <link rel="stylesheet" href="/auth.css" />
+  </head>
+  <body>
+    <main class="auth-shell">
+      <section class="story-panel" aria-label="Project introduction">
+        <nav class="brand-row">
+          <a class="brand" href="/">TASK<span>//</span>API</a>
+          <span class="flyrank">FLYRANK · BACKEND AI</span>
+        </nav>
+
+        <div class="story-copy">
+          <p class="eyebrow">YOUR TASKS. YOUR SPACE.</p>
+          <h1>Pick up right where<br /><em>you left off.</em></h1>
+          <p class="intro">Sign in to see your tasks, add new ones, and keep everything organized in one simple place.</p>
+        </div>
+
+        <div class="trust-path" aria-label="Workspace benefits">
+          <div><b>01</b><span>Simple to use</span></div>
+          <i>+</i>
+          <div><b>02</b><span>Safely stored</span></div>
+          <i>+</i>
+          <div><b>03</b><span>Ready anywhere</span></div>
+        </div>
+
+        <div class="proof-note">
+          <span class="pulse"></span>
+          Your password is handled securely.
+        </div>
+      </section>
+
+      <section class="form-panel">
+        <div class="form-card">
+          <div class="lock-mark" aria-hidden="true"><span></span></div>
+          <p class="card-kicker">WELCOME TO YOUR WORKSPACE</p>
+          <h2 id="form-title">Welcome back.</h2>
+          <p id="form-copy" class="form-copy">Sign in to continue to your task list.</p>
+
+          <div class="mode-switch" role="tablist" aria-label="Authentication mode">
+            <button id="login-tab" class="mode-btn active" type="button" role="tab" aria-selected="true">SIGN IN</button>
+            <button id="signup-tab" class="mode-btn" type="button" role="tab" aria-selected="false">CREATE ACCOUNT</button>
+          </div>
+
+          <form id="auth-form" novalidate>
+            <label for="auth-email">Email address</label>
+            <input id="auth-email" type="email" autocomplete="email" placeholder="you@example.com" required />
+
+            <label for="auth-password">Password</label>
+            <div class="password-field">
+              <input id="auth-password" type="password" autocomplete="current-password" placeholder="Minimum 6 characters" minlength="6" required />
+              <button id="toggle-password" type="button" aria-label="Show password">SHOW</button>
+            </div>
+
+            <p id="auth-message" class="auth-message" role="status" aria-live="polite"></p>
+            <button id="submit-btn" class="submit-btn" type="submit"><span>OPEN MY TASKS</span><b>→</b></button>
+          </form>
+
+          <div class="form-footer">
+            <span>Safe, private sign-in</span>
+            <a href="/docs" target="_blank" rel="noopener">TECHNICAL DOCS ↗</a>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="/auth.js"></script>
+  </body>
+</html>

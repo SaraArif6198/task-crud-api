@@ -400,3 +400,24 @@ body {
     flex-wrap: wrap;
   }
 }
+.session-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.15rem;
+  border: var(--border);
+  background: #c9f4e4;
+  box-shadow: var(--shadow-sm);
+}
+.session-bar > div:first-child { display: grid; grid-template-columns: auto auto; align-items: center; gap: .25rem .65rem; }
+.session-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(20,195,142,.2); }
+.session-bar strong { font-family: "Arial Black", sans-serif; font-size: .78rem; letter-spacing: 1px; }
+.session-bar small { grid-column: 2; font-family: "Courier New", monospace; overflow-wrap: anywhere; }
+.session-actions { display: flex; gap: .65rem; flex: 0 0 auto; }
+
+@media (max-width: 760px) {
+  .session-bar { align-items: stretch; flex-direction: column; }
+  .session-actions .btn { flex: 1; }
+}

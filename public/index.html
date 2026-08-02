@@ -12,10 +12,18 @@
     <header class="masthead">
       <div class="masthead-title">
         <h1>TASK<span class="slash">//</span>API</h1>
-        <p class="tagline">A containerized CRUD API powered by PostgreSQL — restart the stack and your tasks stay.</p>
+        <p class="tagline">PostgreSQL persistence meets Supabase authentication — verify who is calling before opening protected routes.</p>
       </div>
       <a class="docs-link" href="/docs" target="_blank" rel="noopener">SWAGGER /docs →</a>
     </header>
+
+    <section class="session-bar" aria-label="Authenticated session">
+      <div><span class="session-dot"></span><strong>VERIFIED SESSION</strong><small id="session-user">Checking identity…</small></div>
+      <div class="session-actions">
+        <button id="profile-btn" class="btn" type="button">MY PROFILE</button>
+        <button id="logout-btn" class="btn btn-danger" type="button">LOG OUT</button>
+      </div>
+    </section>
 
     <section class="stats" id="stats-bar">
       <div class="stat-card">
@@ -67,8 +75,8 @@
     </main>
 
     <footer class="footer">
-      <span>FlyRank · Backend AI Engineering · Week 3 · A3</span>
-      <span class="mono">Docker Compose · PostgreSQL · persistent volume</span>
+      <span>FlyRank · Backend AI Engineering · Week 4 · Auth</span>
+      <span class="mono">Supabase Auth · verified JWT · protected routes</span>
     </footer>
 
     <script src="/app.js"></script>
